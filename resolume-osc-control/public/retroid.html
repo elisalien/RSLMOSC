@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#08080e">
+<title>RSLM — Retroid</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#08080e;--bg2:#0e0e16;--bg3:#161622;--bg4:#1e1e30;--brd:#222240;--tx:#d4d4e8;--dim:#6a6a88;
+  --cyan:#00d4ee;--vio:#a44aff;--rose:#ff2080;--grn:#00e878;--red:#ff2848;--r:10px}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--tx);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:manipulation}
+.app{display:flex;flex-direction:column;height:100%;padding:8px}
+.hdr{display:flex;align-items:center;gap:6px;padding:4px 0 8px;flex-shrink:0}
+.hdr-logo{font-size:12px;font-weight:700;flex:1;background:linear-gradient(90deg,var(--cyan),var(--vio));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--red);transition:.3s}.dot.on{background:var(--grn)}
+.gps{font-size:9px;color:var(--dim);padding:2px 6px;border-radius:3px;background:var(--bg3)}.gps.on{color:var(--grn)}
+.back{width:28px;height:28px;border-radius:6px;border:1px solid var(--brd);background:var(--bg2);color:var(--dim);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none}
+.grid{flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;overflow-y:auto;align-content:start}
+.ctrl{background:var(--bg2);border:2px solid var(--brd);border-radius:var(--r);padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:80px;cursor:pointer;transition:.12s;position:relative}
+.ctrl-l{font-size:11px;font-weight:700;text-align:center}
+.ctrl.toggle.on{border-width:2px}
+.ctrl.toggle .ind{width:100%;height:6px;border-radius:3px;background:var(--bg4)}
+.ctrl.toggle.on .ind{background:currentColor;box-shadow:0 0 8px currentColor}
+.ctrl.fader{flex-direction:row;gap:8px;padding:8px 12px;grid-column:span 2}
+.ctrl.fader .ctrl-l{width:40px;text-align:left;font-size:10px}
+.ctrl.fader input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:36px;background:0;cursor:pointer}
+.ctrl.fader input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--bg4)}
+.ctrl.fader input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:6px;margin-top:-12px;border:0;background:linear-gradient(140deg,var(--cyan),#0090aa)}
+.ctrl.fader input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--bg4)}
+.ctrl.fader input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:6px;border:0;background:linear-gradient(140deg,var(--cyan),#0090aa)}
+.ctrl.fader .val{width:30px;font-size:12px;font-weight:600;color:var(--dim);text-align:right}
+.gph{position:absolute;top:4px;right:6px;font-size:8px;color:var(--dim)}
+.drow{display:flex;gap:6px;flex-shrink:0;padding-top:6px}
+.dbtn{flex:1;height:44px;border-radius:var(--r);border:2px solid var(--red);background:transparent;color:var(--red);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.dbtn:active{background:var(--red);color:#fff}
+.dbtn.rest{border-color:var(--grn);color:var(--grn)}.dbtn.rest:active{background:var(--grn);color:var(--bg)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr"><div class="hdr-logo">RSLM RETROID</div><div class="gps" id="gps">No gamepad</div><div class="dot" id="dot"></div><a class="back" href="/">←</a></div>
+  <div class="grid" id="grid"></div>
+  <div class="drow"><button class="dbtn" onclick="osc('/composition/video/opacity',0)">BLACKOUT</button><button class="dbtn rest" onclick="osc('/composition/video/opacity',1)">RESTORE</button></div>
+</div>
+<script>
+let C,ws,reconn=null,togSt={},prevBtns=[];
+const $=s=>document.querySelector(s),GP=['A','B','X','Y','LB','RB','LT','RT','SEL','START','L3','R3','↑','↓','←','→'];
+async function init(){
+  try{C=await(await fetch('/api/config')).json();}catch{C={layers:[],groups:[],fx:[]};}
+  const ctrls=[];
+  // Build from FX toggles
+  C.fx.filter(f=>f.type==='toggle').forEach(fx=>{
+    fx.routes.forEach(r=>{const g=C.groups.find(x=>x.id===r.gid);
+      ctrls.push({type:'toggle',id:`${fx.id}-${r.gid}`,label:`${fx.label} ${g?.name||''}`,color:g?.color||'#00d4ee',addr:r.addr,smooth:fx.smooth,dur:fx.smoothDuration||500});
+    });});
+  // First 4 layers as faders
+  C.layers.slice(0,4).forEach((ly,i)=>{ctrls.push({type:'fader',id:`ly-${i}`,label:ly.label,addr:ly.addr});});
+  C._retCtrls=ctrls;buildGrid();connectWS();requestAnimationFrame(pollGP);
+}
+function buildGrid(){const g=$('#grid');let h='';
+  (C._retCtrls||[]).forEach((c,ci)=>{const gp=ci<GP.length?GP[ci]:'';
+    if(c.type==='toggle'){const on=togSt[c.id]||false;
+      h+=`<div class="ctrl toggle${on?' on':''}" id="rc${ci}" style="color:${c.color};border-color:${on?c.color:'var(--brd)'}" onclick="retTog(${ci})">
+        ${gp?`<div class="gph">${gp}</div>`:''}<div class="ctrl-l">${esc(c.label)}</div><div class="ind"></div></div>`;}
+    else{h+=`<div class="ctrl fader" id="rc${ci}">${gp?`<div class="gph">${gp}</div>`:''}<div class="ctrl-l">${esc(c.label)}</div>
+      <input type=range min=0 max=1 step=.005 value=1 id="rf${ci}" oninput="retFader(${ci},this)"><div class="val" id="rv${ci}">100</div></div>`;}
+  });g.innerHTML=h;}
+function retTog(ci){const c=C._retCtrls?.[ci];if(!c)return;togSt[c.id]=!togSt[c.id];const el=$(`#rc${ci}`);const on=togSt[c.id];
+  if(el){el.classList.toggle('on',on);el.style.borderColor=on?c.color:'';}
+  if(c.smooth)smooth(c.addr,on?0:1,on?1:0,c.dur);else osc(c.addr,on?1:0);}
+function retFader(ci,el){const c=C._retCtrls?.[ci];if(!c)return;const v=+el.value;const ve=$(`#rv${ci}`);if(ve)ve.textContent=Math.round(v*100);osc(c.addr,v);}
+function pollGP(){const gps=navigator.getGamepads?.();let gp=null;for(const g of(gps||[]))if(g){gp=g;break;}
+  const st=$('#gps');if(gp){if(!st.classList.contains('on')){st.classList.add('on');st.textContent=gp.id.slice(0,20);}
+    gp.buttons.forEach((b,bi)=>{const p=b.pressed||b.value>.5;if(p&&!prevBtns[bi]&&bi<(C._retCtrls||[]).length&&C._retCtrls[bi].type==='toggle')retTog(bi);prevBtns[bi]=p;});
+    const fis=(C._retCtrls||[]).map((c,i)=>c.type==='fader'?i:-1).filter(i=>i>=0);
+    if(fis[0]!==undefined&&gp.axes?.length>=2){const v=1-(gp.axes[1]+1)/2;const s=$(`#rf${fis[0]}`);if(s){s.value=v;retFader(fis[0],s);}}
+    if(fis[1]!==undefined&&gp.axes?.length>=4){const v=1-(gp.axes[3]+1)/2;const s=$(`#rf${fis[1]}`);if(s){s.value=v;retFader(fis[1],s);}}
+  }else if(st.classList.contains('on')){st.classList.remove('on');st.textContent='No gamepad';}
+  requestAnimationFrame(pollGP);}
+function connectWS(){ws=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}`);
+  ws.onopen=()=>{$('#dot').classList.add('on');if(reconn){clearInterval(reconn);reconn=null;}};
+  ws.onclose=()=>{$('#dot').classList.remove('on');if(!reconn)reconn=setInterval(connectWS,2500);};ws.onerror=()=>ws.close();
+  ws.onmessage=e=>{try{if(JSON.parse(e.data).type==='reload')location.reload();}catch{}};}
+function osc(a,v){if(ws?.readyState===1)ws.send(JSON.stringify({type:'osc',address:a,value:v}));}
+function smooth(a,f,t,d){if(ws?.readyState===1)ws.send(JSON.stringify({type:'smooth',address:a,from:f,to:t,duration:d}));}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+init();
+</script>
+</body>
+</html>

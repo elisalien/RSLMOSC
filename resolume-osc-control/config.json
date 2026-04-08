@@ -1,0 +1,101 @@
+{
+  "osc": { "host": "127.0.0.1", "sendPort": 7000, "receivePort": 7001 },
+  "server": { "httpPort": 3333 },
+  "smooth": { "defaultDuration": 500 },
+  "showLayers": true,
+  "layers": [
+    { "label": "L1", "addr": "/composition/layers/1/video/opacity", "byp": "/composition/layers/1/bypassed" },
+    { "label": "L2", "addr": "/composition/layers/2/video/opacity", "byp": "/composition/layers/2/bypassed" },
+    { "label": "L3", "addr": "/composition/layers/3/video/opacity", "byp": "/composition/layers/3/bypassed" },
+    { "label": "L4", "addr": "/composition/layers/4/video/opacity", "byp": "/composition/layers/4/bypassed" },
+    { "label": "L5", "addr": "/composition/layers/5/video/opacity", "byp": "/composition/layers/5/bypassed" },
+    { "label": "L6", "addr": "/composition/layers/6/video/opacity", "byp": "/composition/layers/6/bypassed" },
+    { "label": "L7", "addr": "/composition/layers/7/video/opacity", "byp": "/composition/layers/7/bypassed" },
+    { "label": "L8", "addr": "/composition/layers/8/video/opacity", "byp": "/composition/layers/8/bypassed" }
+  ],
+  "groups": [
+    { "id": 1, "name": "G1", "color": "#00d4ee" },
+    { "id": 2, "name": "G2", "color": "#a44aff" },
+    { "id": 3, "name": "G3", "color": "#ff2080" }
+  ],
+  "fx": [
+    {
+      "id": "fx1", "label": "Strobe", "type": "toggle",
+      "smooth": true, "smoothDuration": 400,
+      "routes": [
+        { "gid": 1, "addr": "/composition/groups/1/video/effects/strobe/opacity" },
+        { "gid": 2, "addr": "/composition/groups/2/video/effects/strobe/opacity" },
+        { "gid": 3, "addr": "/composition/groups/3/video/effects/strobe/opacity" }
+      ]
+    },
+    {
+      "id": "fx2", "label": "Mirror", "type": "toggle",
+      "smooth": false, "smoothDuration": 500,
+      "routes": [
+        { "gid": 1, "addr": "/composition/groups/1/video/effects/mirror/bypassed" },
+        { "gid": 2, "addr": "/composition/groups/2/video/effects/mirror/bypassed" },
+        { "gid": 3, "addr": "/composition/groups/3/video/effects/mirror/bypassed" }
+      ]
+    },
+    {
+      "id": "fx3", "label": "Blur", "type": "fader",
+      "smooth": false, "smoothDuration": 500,
+      "routes": [
+        { "gid": 1, "addr": "/composition/groups/1/video/effects/blur/effect/param1/values" },
+        { "gid": 2, "addr": "/composition/groups/2/video/effects/blur/effect/param1/values" }
+      ]
+    }
+  ],
+  "levels": [
+    { "label": "Base", "routes": [
+      { "gid": 1, "addr": "/composition/groups/1/video/effects/levels/effect/base" },
+      { "gid": 2, "addr": "/composition/groups/2/video/effects/levels/effect/base" },
+      { "gid": 3, "addr": "/composition/groups/3/video/effects/levels/effect/base" }
+    ]},
+    { "label": "Midpoint", "routes": [
+      { "gid": 1, "addr": "/composition/groups/1/video/effects/levels/effect/midpoint" },
+      { "gid": 2, "addr": "/composition/groups/2/video/effects/levels/effect/midpoint" },
+      { "gid": 3, "addr": "/composition/groups/3/video/effects/levels/effect/midpoint" }
+    ]},
+    { "label": "Ratio", "routes": [
+      { "gid": 1, "addr": "/composition/groups/1/video/effects/levels/effect/ratio" },
+      { "gid": 2, "addr": "/composition/groups/2/video/effects/levels/effect/ratio" },
+      { "gid": 3, "addr": "/composition/groups/3/video/effects/levels/effect/ratio" }
+    ]}
+  ],
+  "colorize": {
+    "linked": true,
+    "routes": [
+      { "gid": 1, "addr": "/composition/groups/1/video/effects/colorize/effect/color/hue" },
+      { "gid": 2, "addr": "/composition/groups/2/video/effects/colorize/effect/color/hue" },
+      { "gid": 3, "addr": "/composition/groups/3/video/effects/colorize/effect/color/hue" }
+    ]
+  },
+  "dreamyGlow": {
+    "linked": true,
+    "routes": [
+      { "gid": 1, "addr": "/composition/groups/1/video/effects/dreamyglow/effect/param1/values", "byp": "/composition/groups/1/video/effects/dreamyglow/bypassed" },
+      { "gid": 2, "addr": "/composition/groups/2/video/effects/dreamyglow/effect/param1/values", "byp": "/composition/groups/2/video/effects/dreamyglow/bypassed" },
+      { "gid": 3, "addr": "/composition/groups/3/video/effects/dreamyglow/effect/param1/values", "byp": "/composition/groups/3/video/effects/dreamyglow/bypassed" }
+    ]
+  },
+  "flows": [
+    { "id": "flow1", "name": "Live Base", "controls": ["layer-0", "layer-1", "fx-fx1", "lev-0", "colorize", "master"] }
+  ],
+  "pads": [
+    {
+      "id": "pad1", "name": "Clips L5",
+      "items": [
+        { "label": "Loop 1", "addr": "/composition/layers/5/clips/1/connect", "color": "cyan" },
+        { "label": "Loop 2", "addr": "/composition/layers/5/clips/2/connect", "color": "cyan" },
+        { "label": "Loop 3", "addr": "/composition/layers/5/clips/3/connect", "color": "vio" },
+        { "label": "Loop 4", "addr": "/composition/layers/5/clips/4/connect", "color": "vio" },
+        { "label": "Loop 5", "addr": "/composition/layers/5/clips/5/connect", "color": "rose" },
+        { "label": "Loop 6", "addr": "/composition/layers/5/clips/6/connect", "color": "rose" },
+        { "label": "Loop 7", "addr": "/composition/layers/5/clips/7/connect", "color": "grn" },
+        { "label": "Loop 8", "addr": "/composition/layers/5/clips/8/connect", "color": "grn" }
+      ]
+    }
+  ],
+  "midi": { "outputPort": "", "mappings": [], "combined": [] }
+}

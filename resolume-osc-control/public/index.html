@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#08080e">
+<title>RSLM CTRL</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#08080e;--bg2:#0e0e16;--bg3:#161622;--bg4:#1e1e30;--brd:#222240;--brd2:#333355;
+  --tx:#d4d4e8;--dim:#6a6a88;--dim2:#484868;--cyan:#00d4ee;--vio:#a44aff;--rose:#ff2080;
+  --grn:#00e878;--red:#ff2848;--org:#ff8820;--r:8px;touch-action:manipulation}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--tx);
+  font-family:'DM Sans',system-ui,sans-serif;font-size:13px;-webkit-tap-highlight-color:transparent;user-select:none}
+.app{display:flex;flex-direction:column;height:100%}
+.ct{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 16px}.ct::-webkit-scrollbar{width:0}
+.nav{display:flex;height:50px;background:var(--bg2);border-top:1px solid var(--brd);flex-shrink:0}
+.nav-b{flex:1;border:none;background:none;color:var(--dim);font-family:inherit;font-size:9px;font-weight:700;
+  letter-spacing:1.5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:.2s}
+.nav-b.on{color:var(--cyan)}
+.nav-b svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5}
+.hdr{display:flex;align-items:center;gap:8px;padding:2px 0 12px}
+.logo{font-size:14px;font-weight:700;letter-spacing:1px;flex:1;background:linear-gradient(90deg,var(--cyan),var(--vio));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red);transition:.3s}.dot.on{background:var(--grn);box-shadow:0 0 6px var(--grn)}
+.ib{width:32px;height:32px;border-radius:var(--r);border:1px solid var(--brd);background:var(--bg2);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:.15s}
+.ib.on{background:var(--vio);color:#fff;border-color:var(--vio)}
+.sec{margin-bottom:14px}.st{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--dim);text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid var(--brd);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.st-r{display:flex;gap:4px;align-items:center}
+.row{display:flex;align-items:center;gap:5px;min-height:36px;padding:3px 0;position:relative}.row+.row{border-top:1px solid rgba(34,34,64,.2)}
+.lbl{font-size:11px;font-weight:600;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbl-s{width:26px;text-align:center;color:var(--dim2);font-weight:700;font-size:12px}.lbl-m{width:52px;color:var(--tx)}
+.val{width:30px;font-size:11px;font-weight:600;color:var(--dim);text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums}
+.fb-bar{position:absolute;bottom:0;left:26px;right:30px;height:2px;background:var(--bg4);border-radius:1px;overflow:hidden;opacity:.4}
+.fb-fill{height:100%;border-radius:1px;transition:width .06s linear;width:0}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:0;cursor:pointer;flex:1;min-width:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--bg4)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:6px;margin-top:-10px;border:0;background:linear-gradient(140deg,var(--cyan),#0090aa);box-shadow:0 2px 6px rgba(0,212,238,.15)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--bg4)}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:6px;border:0;background:linear-gradient(140deg,var(--cyan),#0090aa)}
+.sl-v::-webkit-slider-thumb{background:linear-gradient(140deg,var(--vio),#7030cc)!important}.sl-v::-moz-range-thumb{background:linear-gradient(140deg,var(--vio),#7030cc)!important}
+.sl-g::-webkit-slider-thumb{background:linear-gradient(140deg,var(--grn),#00aa55)!important}.sl-g::-moz-range-thumb{background:linear-gradient(140deg,var(--grn),#00aa55)!important}
+.sl-r::-webkit-slider-thumb{background:linear-gradient(140deg,var(--rose),#cc1060)!important}.sl-r::-moz-range-thumb{background:linear-gradient(140deg,var(--rose),#cc1060)!important}
+.sl-o::-webkit-slider-thumb{background:linear-gradient(140deg,var(--org),#cc6600)!important}.sl-o::-moz-range-thumb{background:linear-gradient(140deg,var(--org),#cc6600)!important}
+/* Hue slider rainbow track */
+.sl-hue::-webkit-slider-runnable-track{background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)!important;height:8px;border-radius:4px}
+.sl-hue::-moz-range-track{background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)!important;height:8px;border-radius:4px}
+.sl-hue::-webkit-slider-thumb{background:#fff!important;box-shadow:0 0 6px rgba(0,0,0,.5)!important;width:20px;height:20px;margin-top:-6px}
+.sl-hue::-moz-range-thumb{background:#fff!important;width:20px;height:20px}
+.btn-byp{width:30px;height:30px;border-radius:6px;border:1px solid var(--brd);background:var(--bg3);color:var(--dim);font-size:9px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.btn-byp.on{background:var(--rose);color:#fff;border-color:var(--rose);box-shadow:0 0 8px rgba(255,32,128,.25)}
+.gt{height:34px;min-width:38px;padding:0 6px;border-radius:6px;border:1px solid var(--brd);background:var(--bg3);color:var(--dim);font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex:1}
+.gt.on{color:#fff}.gt.anim{animation:pulse .5s}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.pill{height:22px;min-width:24px;padding:0 5px;border-radius:4px;border:1px solid var(--brd);background:var(--bg3);font-size:9px;font-weight:700;color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0}
+.pill.on{color:#fff;border-color:currentColor}.pills{display:flex;gap:2px;flex-shrink:0}
+.sm-tag{font-size:7px;font-weight:700;padding:2px 4px;border-radius:3px;background:rgba(0,232,120,.12);color:var(--grn);flex-shrink:0}
+.link-tag{font-size:7px;font-weight:700;padding:2px 4px;border-radius:3px;background:rgba(164,74,255,.12);color:var(--vio);flex-shrink:0;cursor:pointer}
+.cl-card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);padding:8px 10px;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.cl-tag{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.hue-preview{width:24px;height:24px;border-radius:4px;flex-shrink:0;border:1px solid var(--brd)}
+/* Flow */
+.flow-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.flow-item{background:var(--bg2);border:1px solid var(--brd);border-radius:12px;padding:14px}
+.flow-item .lbl-m{width:auto;font-size:14px;margin-bottom:8px}
+.flow-item input[type=range]{height:48px}
+.flow-item input[type=range]::-webkit-slider-thumb{width:40px;height:40px;margin-top:-18px;border-radius:10px}
+.flow-item .val{font-size:16px;width:44px}
+.flow-item .gt{height:52px;font-size:14px;border-radius:10px;min-width:52px}
+.flow-back{position:fixed;top:10px;right:10px;z-index:50;width:40px;height:40px;border-radius:50%;background:rgba(8,8,14,.85);border:1px solid var(--brd2);color:var(--tx);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px)}
+.flow-li{display:flex;align-items:center;gap:8px;padding:12px;background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:6px;cursor:pointer;transition:.15s}
+.flow-li:active{border-color:var(--cyan)}.flow-li .lbl-m{width:auto;flex:1}
+/* Pads */
+.pad-tabs{display:flex;gap:4px;margin-bottom:8px;overflow-x:auto}.pad-tabs::-webkit-scrollbar{height:0}
+.pad-tab{padding:6px 12px;border-radius:6px;border:1px solid var(--brd);background:var(--bg2);color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:.15s}
+.pad-tab.on{color:var(--cyan);border-color:var(--cyan)}
+.pad-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.pad-btn{aspect-ratio:1.2;border-radius:12px;border:2px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:13px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:.12s;min-height:70px}
+.pad-btn:active,.pad-btn.on{transform:scale(.97)}.pad-btn .pn{font-size:12px;font-weight:700}.pad-btn .ps{font-size:8px;color:var(--dim)}
+.drow{display:flex;gap:8px;margin-top:8px}
+.dbtn{flex:1;height:44px;border-radius:var(--r);border:2px solid var(--red);background:transparent;color:var(--red);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:.15s;font-family:inherit}
+.dbtn:active{background:var(--red);color:#fff;transform:scale(.97)}.dbtn.rest{border-color:var(--grn);color:var(--grn)}.dbtn.rest:active{background:var(--grn);color:var(--bg)}
+.eonly{display:none !important}.editing .eonly{display:flex !important}
+.ebtn{width:26px;height:26px;border-radius:4px;border:1px solid var(--brd);background:var(--bg3);color:var(--dim);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ebtn:active{background:var(--vio);color:#fff}
+.addbtn{width:100%;padding:10px;border-radius:var(--r);border:1px dashed var(--brd);background:transparent;color:var(--vio);font-size:12px;font-weight:600;cursor:pointer;text-align:center;font-family:inherit}
+/* Modal */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;backdrop-filter:blur(4px)}.ov.show{display:block}
+.mod{position:fixed;bottom:0;left:0;right:0;max-height:88vh;background:var(--bg2);border-top:1px solid var(--brd2);border-radius:14px 14px 0 0;z-index:101;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 28px;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}.mod.show{transform:translateY(0)}
+.mod-bar{width:32px;height:3px;border-radius:2px;background:var(--brd2);margin:0 auto 14px}
+.mod h2{font-size:15px;font-weight:700;margin-bottom:14px}
+.fld{margin-bottom:12px}.fld-l{font-size:11px;font-weight:600;color:var(--dim);margin-bottom:4px}
+.fld input,.fld select{width:100%;height:38px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--tx);font-family:inherit;font-size:13px;padding:0 10px}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--vio)}.fld select option{background:var(--bg2)}
+.fld-row{display:flex;gap:8px}.fld-row .fld{flex:1}
+.fld-check{display:flex;align-items:center;gap:8px;padding:6px 0}.fld-check label{font-size:12px;font-weight:600;flex:1}
+.sw{width:44px;height:24px;border-radius:12px;border:none;background:var(--bg4);cursor:pointer;position:relative;transition:.2s;flex-shrink:0}.sw.on{background:var(--grn)}.sw::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:10px;background:#fff;transition:.2s}.sw.on::after{left:22px}
+.route-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding:8px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--brd)}
+.route-tag{min-width:28px;height:24px;padding:0 5px;border-radius:4px;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.route-input{flex:1;height:32px;background:var(--bg4);border:1px solid var(--brd);border-radius:5px;color:var(--tx);font-family:monospace;font-size:10px;padding:0 6px}
+.route-input:focus{outline:none;border-color:var(--vio)}
+.route-del{width:24px;height:24px;border-radius:4px;border:1px solid var(--brd);background:var(--bg4);color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fl-chk{display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;margin-bottom:4px;cursor:pointer}
+.fl-chk.on{border-color:var(--cyan);background:var(--bg4)}.fl-chk .fl-dot{width:16px;height:16px;border-radius:4px;border:2px solid var(--brd);flex-shrink:0;transition:.15s}.fl-chk.on .fl-dot{background:var(--cyan);border-color:var(--cyan)}.fl-chk .fl-n{font-size:12px;font-weight:600;flex:1}
+.mod-btns{display:flex;gap:6px;margin-top:16px}.mod-btns button{flex:1;height:40px;border-radius:var(--r);border:none;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.btn-ok{background:var(--cyan);color:var(--bg)}.btn-del{background:transparent;border:1px solid var(--red)!important;color:var(--red)}.btn-no{background:var(--bg3);color:var(--dim)}
+.preset-item{display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;margin-bottom:4px}
+.preset-item .lbl-m{flex:1;width:auto;cursor:pointer}
+.toast{position:fixed;top:50px;left:50%;transform:translateX(-50%);background:var(--vio);color:#fff;padding:7px 18px;border-radius:16px;font-size:11px;font-weight:600;z-index:200;opacity:0;transition:.3s;pointer-events:none}.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="ct" id="ct"></div>
+  <div class="nav">
+    <button class="nav-b on" data-m="ctrl" onclick="setMode('ctrl')"><svg viewBox="0 0 24 24"><path d="M12 2v20M6 6v12M18 8v8M3 10v4M21 10v4"/></svg>CTRL</button>
+    <button class="nav-b" data-m="flow" onclick="setMode('flow')"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 21V3M16 21V3"/></svg>FLOW</button>
+    <button class="nav-b" data-m="pads" onclick="setMode('pads')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>PADS</button>
+    <a class="nav-b" href="/retroid.html" style="text-decoration:none;flex:.6"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/></svg>RET</a>
+  </div>
+</div>
+
+<!-- FX EDITOR -->
+<div class="ov" id="fxOv" onclick="closeFx()"></div>
+<div class="mod" id="fxMod"><div class="mod-bar"></div><h2 id="fxT">FX</h2>
+  <div class="fld"><div class="fld-l">Label</div><input id="eLabel"></div>
+  <div class="fld"><div class="fld-l">Type</div><select id="eType"><option value="toggle">Toggle (on/off)</option><option value="fader">Fader</option></select></div>
+  <div class="fld-check"><label>Smooth</label><button class="sw" id="eSmooth" onclick="togSw(this)"></button></div>
+  <div class="fld" id="eSmDW" style="display:none"><div class="fld-l">Durée (ms)</div><input id="eSmDur" type="number" min="50" step="50" value="500"></div>
+  <div class="fld-l" style="margin-bottom:6px">Adresses OSC par groupe</div>
+  <div id="eRoutes"></div>
+  <button class="addbtn" onclick="addFxRoute()" style="margin-top:4px">＋ Groupe</button>
+  <div class="mod-btns"><button class="btn-del" id="eDel" onclick="delFx()">Suppr</button><button class="btn-no" onclick="closeFx()">Annuler</button><button class="btn-ok" onclick="saveFx()">OK</button></div>
+</div>
+
+<!-- LAYER EDITOR -->
+<div class="ov" id="lyOv" onclick="closeLy()"></div>
+<div class="mod" id="lyMod"><div class="mod-bar"></div><h2>Layers</h2><div id="lyRows"></div>
+  <button class="addbtn" onclick="addLy()" style="margin-top:8px">＋ Layer</button>
+  <div class="mod-btns"><button class="btn-no" onclick="closeLy()">Annuler</button><button class="btn-ok" onclick="saveLy()">OK</button></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="ov" id="setOv" onclick="closeSet()"></div>
+<div class="mod" id="setMod"><div class="mod-bar"></div><h2>Paramètres</h2>
+  <div class="fld"><div class="fld-l">IP Resolume</div><input id="sH"></div>
+  <div class="fld-row"><div class="fld"><div class="fld-l">Port envoi</div><input id="sS" type="number"></div><div class="fld"><div class="fld-l">Port retour</div><input id="sR" type="number"></div></div>
+  <div class="fld"><div class="fld-l">Smooth défaut (ms)</div><input id="sSm" type="number"></div>
+  <div class="sec" style="margin-top:14px"><div class="st">MIDI</div></div>
+  <div class="fld"><div class="fld-l">Port MIDI</div><select id="midiPort" onchange="selMidi(this.value)"><option value="">Aucun</option></select></div>
+  <div class="fld-l">Status : <span id="midiSt" style="color:var(--dim)">—</span></div>
+  <div class="sec" style="margin-top:14px"><div class="st">Presets</div></div>
+  <div class="fld-row"><div class="fld"><input id="prName" placeholder="Nom"></div><button class="btn-ok" style="width:70px;flex:none;height:38px;border-radius:var(--r);font-size:11px" onclick="savePr()">Sauver</button></div>
+  <div id="prList" style="margin-top:6px"></div>
+  <div class="mod-btns"><button class="btn-no" onclick="closeSet()">Fermer</button></div>
+</div>
+
+<!-- FLOW EDITOR -->
+<div class="ov" id="flOv" onclick="closeFl()"></div>
+<div class="mod" id="flMod"><div class="mod-bar"></div><h2 id="flT">Flow</h2>
+  <div class="fld"><div class="fld-l">Nom</div><input id="flN"></div>
+  <div class="fld-l" style="margin-bottom:6px">Contrôles</div><div id="flChks"></div>
+  <div class="mod-btns"><button class="btn-del" id="flDel" onclick="delFl()">Suppr</button><button class="btn-no" onclick="closeFl()">Annuler</button><button class="btn-ok" onclick="saveFl()">OK</button></div>
+</div>
+
+<!-- PAD EDITOR -->
+<div class="ov" id="padOv" onclick="closePad()"></div>
+<div class="mod" id="padMod"><div class="mod-bar"></div><h2>Page PAD</h2>
+  <div class="fld"><div class="fld-l">Nom</div><input id="padN"></div>
+  <div class="fld-l" style="margin-bottom:6px">Pads (8 max)</div><div id="padRows"></div>
+  <button class="addbtn" onclick="addPadI()" style="margin-top:6px">＋ Pad</button>
+  <div class="mod-btns"><button class="btn-del" onclick="delPadPg()">Suppr page</button><button class="btn-no" onclick="closePad()">Annuler</button><button class="btn-ok" onclick="savePadPg()">OK</button></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══ STATE ═══ */
+let C,ws,editing=false,reconn=null,mode='ctrl',activeFlow=null,activePad=0;
+let editIdx=-1,editFlIdx=-1,editPdIdx=-1;
+let layerByp={},layerVal={};
+let togSt={},fxVals={},faderMuted={};
+let levVals=[.5,.5,.5],levMuted={};
+let hueVal=0,hueMuted={};
+let glowVal=0,glowByp={};
+let fb={};
+let editLayers=[],editFxRoutes=[],editPadItems=[];
+
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+
+/* ═══ INIT ═══ */
+async function init(){
+  try{C=await(await fetch('/api/config')).json();}catch{C={osc:{host:'127.0.0.1',sendPort:7000,receivePort:7001},server:{httpPort:3333},smooth:{defaultDuration:500},showLayers:true,layers:[],groups:[],fx:[],levels:[],colorize:{linked:true,routes:[]},dreamyGlow:{linked:true,routes:[]},flows:[],pads:[],midi:{}};}
+  C.layers.forEach((_,i)=>{layerByp[i]=false;layerVal[i]=1;});
+  C.fx.forEach(f=>{fxVals[f.id]=0;f.routes.forEach(r=>togSt[f.id+'-'+r.gid]=false);});
+  render();connectWS();
+}
+
+/* ═══ WS ═══ */
+function connectWS(){
+  ws=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}`);
+  ws.onopen=()=>{$$('.dot').forEach(d=>d.classList.add('on'));if(reconn){clearInterval(reconn);reconn=null;}};
+  ws.onclose=()=>{$$('.dot').forEach(d=>d.classList.remove('on'));if(!reconn)reconn=setInterval(connectWS,2500);};
+  ws.onerror=()=>ws.close();
+  ws.onmessage=e=>{try{const m=JSON.parse(e.data);
+    if(m.type==='fb'){onFB(m.address,m.args);updBar(m.address,m.args?.[0]);}
+    if(m.type==='smooth_progress')updBar(m.address,m.value);
+    if(m.type==='reload')location.reload();
+    if(m.type==='midi_ports'){const s=$('#midiPort');if(s)s.innerHTML='<option value="">Aucun</option>'+m.ports.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');}
+    if(m.type==='midi_status'){const s=$('#midiSt');if(s){s.textContent=m.connected?'✓ '+m.port:'—';s.style.color=m.connected?'var(--grn)':'var(--dim)';}}
+  }catch{}};
+}
+function osc(a,v){if(ws?.readyState===1){ws.send(JSON.stringify({type:'osc',address:a,value:v}));ws.send(JSON.stringify({type:'value_update',id:a,value:v}));}}
+function smooth(a,f,t,d){if(ws?.readyState===1)ws.send(JSON.stringify({type:'smooth',address:a,from:f,to:t,duration:d}));}
+
+function onFB(addr,args){if(!args?.length)return;const v=args[0];fb[addr]=v;
+  C.layers.forEach((ly,i)=>{
+    if(addr===ly.addr){const s=$(`#lf${i}`);if(s&&!s.dataset.t){s.value=v;$(`#lv${i}`).textContent=Math.round(v*100);}}
+    if(addr===ly.byp){layerByp[i]=v>.5;$(`#lb${i}`)?.classList.toggle('on',v>.5);}
+  });
+  if(addr==='/composition/video/opacity'){const s=$('#mf');if(s&&!s.dataset.t){s.value=v;$('#mv').textContent=Math.round(v*100);}}
+}
+function updBar(addr,val){if(val===undefined)return;document.querySelectorAll(`.fb-fill[data-a="${CSS.escape(addr)}"]`).forEach(b=>b.style.width=(val*100)+'%');}
+
+/* ═══ MODES ═══ */
+function setMode(m){mode=m;activeFlow=null;$$('.nav-b').forEach(b=>b.classList.toggle('on',b.dataset?.m===m));render();}
+function render(){const c=$('#ct');
+  if(mode==='ctrl')c.innerHTML=rCtrl();
+  else if(mode==='flow')c.innerHTML=activeFlow!==null?rFlowActive():rFlowList();
+  else if(mode==='pads')c.innerHTML=rPads();
+  document.body.classList.toggle('editing',editing);
+}
+
+function rHdr(){return`<div class="hdr"><div class="logo">RSLM CTRL</div><div class="dot"></div><button class="ib${editing?' on':''}" onclick="toggleEdit()">✎</button><button class="ib eonly" onclick="openSet()" style="font-size:13px">⚙</button></div>`;}
+
+/* ═══ CTRL ═══ */
+function rCtrl(){
+  let h=rHdr();
+  // Layers
+  if(C.showLayers!==false){
+    h+=`<div class="sec"><div class="st">Layers<div class="st-r"><button class="ebtn eonly" onclick="C.showLayers=false;render();persist()">▼</button><button class="ebtn eonly" onclick="openLy()">✎</button></div></div>`;
+    C.layers.forEach((ly,i)=>{
+      h+=`<div class="row"><div class="lbl lbl-s">${esc(ly.label)}</div>
+        <button class="btn-byp${layerByp[i]?' on':''}" id="lb${i}" onclick="togByp(${i})">B</button>
+        <input type=range min=0 max=1 step=.005 value="${layerVal[i]??1}" id="lf${i}" oninput="onLF(${i},this)" ontouchstart="this.dataset.t=1" ontouchend="delete this.dataset.t" onmousedown="this.dataset.t=1" onmouseup="delete this.dataset.t">
+        <div class="val" id="lv${i}">${Math.round((layerVal[i]??1)*100)}</div>
+        <div class="fb-bar"><div class="fb-fill" data-a="${ly.addr}" style="background:var(--cyan);width:${(fb[ly.addr]||0)*100}%"></div></div></div>`;
+    });h+=`</div>`;
+  } else {
+    h+=`<div class="sec"><div class="st">Layers (masqué)<div class="st-r"><button class="ebtn" onclick="C.showLayers=true;render();persist()">▶</button></div></div></div>`;
+  }
+
+  // FX
+  h+=`<div class="sec"><div class="st">Effets</div>`;
+  C.fx.forEach((fx,idx)=>{h+=rFxRow(fx,idx,false);});
+  h+=`<button class="addbtn eonly" onclick="openFx(-1)">＋ FX</button></div>`;
+
+  // Levels
+  if(C.levels?.length){
+    h+=`<div class="sec"><div class="st">Levels</div>`;
+    C.levels.forEach((lev,li)=>{
+      const cls=['sl-o','sl-v','sl-r'][li%3];
+      h+=`<div class="row"><div class="lbl lbl-m">${esc(lev.label)}</div>
+        <div class="pills">${lev.routes.map(r=>{const g=C.groups.find(x=>x.id===r.gid);const mu=levMuted[r.gid];
+          return`<div class="pill${mu?'':' on'}" style="${mu?'':'color:'+g?.color}" data-g="${r.gid}" onclick="togLevP(this)">${g?.name}</div>`;}).join('')}</div>
+        <input type=range min=0 max=1 step=.005 value="${levVals[li]||.5}" class="${cls}" id="lev${li}" oninput="onLev(${li},this)" ontouchstart="this.dataset.t=1" ontouchend="delete this.dataset.t" onmousedown="this.dataset.t=1" onmouseup="delete this.dataset.t">
+        <div class="val" id="levv${li}">${Math.round((levVals[li]||.5)*100)}</div></div>`;
+    });h+=`</div>`;
+  }
+
+  // Colorize — hue slider
+  if(C.colorize?.routes?.length){
+    const linked=C.colorize.linked!==false;
+    h+=`<div class="sec"><div class="st">Colorize<div class="st-r">`;
+    h+=`<div class="link-tag" onclick="C.colorize.linked=!C.colorize.linked;render();persist()">${linked?'LINKED':'UNLINKED'}</div></div></div>`;
+    if(linked){
+      const col=hslToHex(hueVal);
+      h+=`<div class="cl-card"><div class="hue-preview" id="huePrev" style="background:${col}"></div>
+        <input type=range min=0 max=1 step=.002 value="${hueVal}" class="sl-hue" id="hueSlider" oninput="onHue(+this.value)">
+        <div class="val" id="hueV">${Math.round(hueVal*360)}°</div></div>`;
+    } else {
+      C.colorize.routes.forEach((r,ri)=>{const g=C.groups.find(x=>x.id===r.gid);
+        h+=`<div class="cl-card"><div class="cl-tag" style="background:${g?.color}">${g?.name}</div>
+          <input type=range min=0 max=1 step=.002 value="${hueVal}" class="sl-hue" oninput="onHueSingle(${ri},+this.value)">
+          <div class="val">${Math.round(hueVal*360)}°</div></div>`;
+      });
+    }
+    h+=`</div>`;
+  }
+
+  // Dreamy Glow
+  if(C.dreamyGlow?.routes?.length){
+    const linked=C.dreamyGlow.linked!==false;
+    h+=`<div class="sec"><div class="st">Dreamy Glow<div class="st-r">`;
+    h+=`<div class="link-tag" onclick="C.dreamyGlow.linked=!C.dreamyGlow.linked;render();persist()">${linked?'LINKED':'UNLINKED'}</div></div></div>`;
+    if(linked){
+      h+=`<div class="row"><div class="lbl lbl-m">Glow</div>
+        <input type=range min=0 max=1 step=.005 value="${glowVal}" class="sl-r" id="glowF" oninput="onGlow(+this.value)" ontouchstart="this.dataset.t=1" ontouchend="delete this.dataset.t" onmousedown="this.dataset.t=1" onmouseup="delete this.dataset.t">
+        <div class="val" id="glowV">${Math.round(glowVal*100)}</div></div>`;
+      h+=`<div class="row">${C.dreamyGlow.routes.map(r=>{const g=C.groups.find(x=>x.id===r.gid);
+        return`<button class="btn-byp${glowByp[r.gid]?' on':''}" id="glb${r.gid}" onclick="togGlByp(${r.gid})" style="width:auto;padding:0 8px;font-size:9px">${g?.name} B</button>`;}).join('')}</div>`;
+    } else {
+      C.dreamyGlow.routes.forEach(r=>{const g=C.groups.find(x=>x.id===r.gid);const v=glowVal;
+        h+=`<div class="row"><div class="cl-tag" style="background:${g?.color};font-size:9px;padding:3px 6px;border-radius:4px;color:#fff;flex-shrink:0">${g?.name}</div>
+          <button class="btn-byp${glowByp[r.gid]?' on':''}" id="glb${r.gid}" onclick="togGlByp(${r.gid})" style="width:26px;height:26px;font-size:8px">B</button>
+          <input type=range min=0 max=1 step=.005 value="${v}" class="sl-r" oninput="onGlowSingle(${r.gid},+this.value)" ontouchstart="this.dataset.t=1" ontouchend="delete this.dataset.t" onmousedown="this.dataset.t=1" onmouseup="delete this.dataset.t">
+          <div class="val">${Math.round(v*100)}</div></div>`;
+      });
+    }
+    h+=`</div>`;
+  }
+
+  // Master
+  h+=`<div class="sec"><div class="st">Master</div><div class="row"><div class="lbl lbl-s" style="color:var(--grn);font-weight:700">M</div>
+    <input type=range min=0 max=1 step=.005 value=1 class="sl-g" id="mf" oninput="onM(this)" ontouchstart="this.dataset.t=1" ontouchend="delete this.dataset.t" onmousedown="this.dataset.t=1" onmouseup="delete this.dataset.t">
+    <div class="val" id="mv">100</div></div>
+    <div class="drow"><button class="dbtn" onclick="osc('/composition/video/opacity',0);$('#mf').value=0;$('#mv').textContent='0'">BLACKOUT</button>
+      <button class="dbtn rest" onclick="osc('/composition/video/opacity',1);$('#mf').value=1;$('#mv').textContent='100'">RESTORE</button></div></div>`;
+  return h;
+}
+
+function rFxRow(fx,idx,large){
+  let h=`<div class="row${large?' flow-item':''}">`+`<div class="lbl lbl-m">${esc(fx.label)}</div>`;
+  if(fx.smooth)h+=`<div class="sm-tag">SM</div>`;
+  if(fx.type==='toggle'){
+    fx.routes.forEach(r=>{const g=C.groups.find(x=>x.id===r.gid);const on=togSt[fx.id+'-'+r.gid];
+      h+=`<button class="gt${on?' on':''}" id="gt-${fx.id}-${r.gid}" style="${on?'background:'+g?.color+';border-color:'+g?.color+';':''}" onclick="onTog('${fx.id}',${r.gid})">${g?.name}</button>`;});
+  } else {
+    h+=`<div class="pills">${fx.routes.map(r=>{const g=C.groups.find(x=>x.id===r.gid);const mu=faderMuted[fx.id+'-'+r.gid];
+      return`<div class="pill${mu?'':' on'}" style="${mu?'':'color:'+g?.color}" data-fx="${fx.id}" data-g="${r.gid}" onclick="togPill(this)">${g?.name}</div>`;}).join('')}</div>`;
+    const v=fxVals[fx.id]||0;
+    h+=`<input type=range min=0 max=1 step=.005 value="${v}" class="sl-v" id="ff${fx.id}" oninput="onFxS('${fx.id}',this)" ontouchstart="this.dataset.t=1" ontouchend="delete this.dataset.t" onmousedown="this.dataset.t=1" onmouseup="delete this.dataset.t">
+      <div class="val" id="fv${fx.id}">${Math.round(v*100)}</div>`;
+  }
+  if(!large)h+=`<button class="ebtn eonly" onclick="openFx(${idx})">✎</button>`;
+  // FB bars per route
+  fx.routes.forEach(r=>{h+=`<div class="fb-bar" style="height:1px;opacity:.3"><div class="fb-fill" data-a="${r.addr}" style="background:${C.groups.find(x=>x.id===r.gid)?.color||'var(--vio)'};width:${(fb[r.addr]||0)*100}%"></div></div>`;});
+  h+=`</div>`;return h;
+}
+
+/* ═══ FLOW ═══ */
+function rFlowList(){let h=rHdr();
+  h+=`<div class="sec"><div class="st">Flows<div class="st-r"><button class="addbtn eonly" onclick="openFl(-1)" style="padding:4px 10px;width:auto">＋</button></div></div>`;
+  if(!C.flows?.length)h+=`<p style="color:var(--dim);text-align:center;padding:20px">Aucun flow.</p>`;
+  (C.flows||[]).forEach((fl,i)=>{
+    h+=`<div class="flow-li" onclick="activeFlow=${i};render()"><div class="lbl-m">${esc(fl.name)}</div><div style="font-size:10px;color:var(--dim)">${fl.controls.length}</div>
+      <button class="ebtn eonly" onclick="event.stopPropagation();openFl(${i})">✎</button></div>`;});
+  h+=`</div>`;return h;
+}
+
+function rFlowActive(){
+  const fl=C.flows[activeFlow];if(!fl)return rFlowList();
+  let h=`<button class="flow-back" onclick="activeFlow=null;render()">✕</button>`;
+  h+=`<div style="font-size:16px;font-weight:700;margin-bottom:12px">${esc(fl.name)}</div><div class="flow-grid">`;
+  fl.controls.forEach(cid=>{
+    if(cid.startsWith('layer-')){const i=+cid.split('-')[1];const ly=C.layers[i];if(!ly)return;
+      h+=`<div class="flow-item"><div class="lbl-m">${esc(ly.label)}</div><div class="row">
+        <button class="btn-byp${layerByp[i]?' on':''}" id="lb${i}" onclick="togByp(${i})" style="width:40px;height:40px;font-size:12px">B</button>
+        <input type=range min=0 max=1 step=.005 value="${layerVal[i]??1}" id="lf${i}" oninput="onLF(${i},this)" ontouchstart="this.dataset.t=1" ontouchend="delete this.dataset.t" onmousedown="this.dataset.t=1" onmouseup="delete this.dataset.t">
+        <div class="val" id="lv${i}">${Math.round((layerVal[i]??1)*100)}</div></div></div>`;}
+    else if(cid.startsWith('fx-')){const fid=cid.slice(3);const fx=C.fx.find(f=>f.id===fid);if(fx)h+=rFxRow(fx,C.fx.indexOf(fx),true);}
+    else if(cid.startsWith('lev-')){const li=+cid.split('-')[1];const lev=C.levels?.[li];if(!lev)return;
+      h+=`<div class="flow-item"><div class="lbl-m">Levels: ${esc(lev.label)}</div><div class="row">
+        <input type=range min=0 max=1 step=.005 value="${levVals[li]||.5}" class="sl-o" id="lev${li}" oninput="onLev(${li},this)" ontouchstart="this.dataset.t=1" ontouchend="delete this.dataset.t" onmousedown="this.dataset.t=1" onmouseup="delete this.dataset.t">
+        <div class="val" id="levv${li}">${Math.round((levVals[li]||.5)*100)}</div></div></div>`;}
+    else if(cid==='colorize'){
+      h+=`<div class="flow-item"><div class="lbl-m">Colorize</div><div class="row">
+        <input type=range min=0 max=1 step=.002 value="${hueVal}" class="sl-hue" oninput="onHue(+this.value)" style="height:44px">
+        <div class="hue-preview" style="background:${hslToHex(hueVal)};width:32px;height:32px"></div></div></div>`;}
+    else if(cid==='glow'){
+      h+=`<div class="flow-item"><div class="lbl-m">Dreamy Glow</div><div class="row">
+        <input type=range min=0 max=1 step=.005 value="${glowVal}" class="sl-r" oninput="onGlow(+this.value)">
+        <div class="val">${Math.round(glowVal*100)}</div></div></div>`;}
+    else if(cid==='master'){
+      h+=`<div class="flow-item"><div class="lbl-m" style="color:var(--grn)">Master</div><div class="row">
+        <input type=range min=0 max=1 step=.005 value=1 class="sl-g" id="mf" oninput="onM(this)" ontouchstart="this.dataset.t=1" ontouchend="delete this.dataset.t" onmousedown="this.dataset.t=1" onmouseup="delete this.dataset.t">
+        <div class="val" id="mv">100</div></div>
+        <div class="drow" style="margin-top:6px"><button class="dbtn" onclick="osc('/composition/video/opacity',0);$('#mf').value=0;$('#mv').textContent='0'">BLACK</button>
+          <button class="dbtn rest" onclick="osc('/composition/video/opacity',1);$('#mf').value=1;$('#mv').textContent='100'">REST</button></div></div>`;}
+  });
+  h+=`</div>`;return h;
+}
+
+/* ═══ PADS ═══ */
+function rPads(){let h=rHdr();
+  h+=`<div class="pad-tabs">`+(C.pads||[]).map((p,i)=>`<div class="pad-tab${i===activePad?' on':''}" onclick="activePad=${i};render()">${esc(p.name)}</div>`).join('');
+  h+=`<div class="pad-tab eonly" onclick="openPad(-1)" style="color:var(--vio);border-color:var(--vio)">＋</div></div>`;
+  const pg=C.pads?.[activePad];if(!pg){h+=`<p style="color:var(--dim);text-align:center;padding:20px">Aucune page.</p>`;return h;}
+  h+=`<button class="ebtn eonly" onclick="openPad(${activePad})" style="margin-bottom:8px;width:auto;padding:0 10px;height:30px">✎ Page</button>`;
+  h+=`<div class="pad-grid">`+(pg.items||[]).map((p,i)=>{const col=`var(--${p.color||'cyan'})`;
+    return`<button class="pad-btn" id="pd${activePad}-${i}" style="border-color:${col}"
+      ontouchstart="pdDn(${activePad},${i})" ontouchend="pdUp(${activePad},${i})" onmousedown="pdDn(${activePad},${i})" onmouseup="pdUp(${activePad},${i})">
+      <div class="pn" style="color:${col}">${esc(p.label)}</div><div class="ps">${shortA(p.addr)}</div></button>`;}).join('');
+  h+=`</div>`;return h;
+}
+function pdDn(p,i){const pad=C.pads[p]?.items[i];if(!pad)return;const b=$(`#pd${p}-${i}`);if(b){b.classList.add('on');b.style.background=`var(--${pad.color||'cyan'})`;b.style.color='var(--bg)';}osc(pad.addr,1);}
+function pdUp(p,i){const b=$(`#pd${p}-${i}`);if(b){b.classList.remove('on');b.style.background='';b.style.color='';}}
+function shortA(a){return a?a.replace('/composition/','').slice(0,30):'—';}
+
+/* ═══ HANDLERS ═══ */
+function onLF(i,el){const v=+el.value;layerVal[i]=v;$(`#lv${i}`).textContent=Math.round(v*100);osc(C.layers[i].addr,v);}
+function togByp(i){layerByp[i]=!layerByp[i];$(`#lb${i}`)?.classList.toggle('on',layerByp[i]);osc(C.layers[i].byp,layerByp[i]?1:0);}
+
+function onTog(fxId,gid){const fx=C.fx.find(f=>f.id===fxId);if(!fx)return;const r=fx.routes.find(x=>x.gid===gid);if(!r)return;
+  const k=fxId+'-'+gid;togSt[k]=!togSt[k];
+  const b=$(`#gt-${fxId}-${gid}`),g=C.groups.find(x=>x.id===gid);
+  if(b){b.classList.toggle('on',togSt[k]);b.style.background=togSt[k]?g?.color||'':'';b.style.borderColor=togSt[k]?g?.color||'':'';}
+  if(fx.smooth){smooth(r.addr,togSt[k]?0:1,togSt[k]?1:0,fx.smoothDuration||C.smooth?.defaultDuration||500);b?.classList.add('anim');setTimeout(()=>b?.classList.remove('anim'),fx.smoothDuration||500);}
+  else osc(r.addr,togSt[k]?1:0);
+}
+
+function onFxS(id,el){const v=+el.value;fxVals[id]=v;$(`#fv${id}`).textContent=Math.round(v*100);
+  const fx=C.fx.find(f=>f.id===id);if(!fx)return;fx.routes.forEach(r=>{if(!faderMuted[id+'-'+r.gid])osc(r.addr,v);});}
+function togPill(el){const id=el.dataset.fx,g=+el.dataset.g,gr=C.groups.find(x=>x.id===g);faderMuted[id+'-'+g]=!faderMuted[id+'-'+g];
+  el.classList.toggle('on',!faderMuted[id+'-'+g]);el.style.color=faderMuted[id+'-'+g]?'':gr?.color||'';}
+
+function onLev(li,el){const v=+el.value;levVals[li]=v;$(`#levv${li}`).textContent=Math.round(v*100);
+  const lev=C.levels[li];if(!lev)return;lev.routes.forEach(r=>{if(!levMuted[r.gid])osc(r.addr,v);});}
+function togLevP(el){const g=+el.dataset.g,gr=C.groups.find(x=>x.id===g);levMuted[g]=!levMuted[g];el.classList.toggle('on',!levMuted[g]);el.style.color=levMuted[g]?'':gr?.color||'';}
+
+// Colorize — hue
+function hslToHex(h){const s=1,l=.5;const a=s*Math.min(l,1-l);const f=n=>{const k=(n+h*12)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))));};
+  return`#${[f(0),f(8),f(4)].map(x=>x.toString(16).padStart(2,'0')).join('')}`;}
+function onHue(v){hueVal=v;const prev=$('#huePrev');if(prev)prev.style.background=hslToHex(v);const vEl=$('#hueV');if(vEl)vEl.textContent=Math.round(v*360)+'°';
+  (C.colorize?.routes||[]).forEach(r=>{if(!hueMuted[r.gid])osc(r.addr,v);});}
+function onHueSingle(ri,v){const r=C.colorize?.routes?.[ri];if(r)osc(r.addr,v);}
+
+// Dreamy Glow
+function onGlow(v){glowVal=v;const ve=$('#glowV');if(ve)ve.textContent=Math.round(v*100);
+  (C.dreamyGlow?.routes||[]).forEach(r=>{if(!glowByp[r.gid])osc(r.addr,v);});}
+function onGlowSingle(gid,v){const r=C.dreamyGlow?.routes?.find(x=>x.gid===gid);if(r)osc(r.addr,v);}
+function togGlByp(gid){glowByp[gid]=!glowByp[gid];$(`#glb${gid}`)?.classList.toggle('on',glowByp[gid]);
+  const r=C.dreamyGlow?.routes?.find(x=>x.gid===gid);if(r?.byp)osc(r.byp,glowByp[gid]?1:0);}
+
+function onM(el){const v=+el.value;$('#mv').textContent=Math.round(v*100);osc('/composition/video/opacity',v);}
+
+/* ═══ EDITORS ═══ */
+function toggleEdit(){editing=!editing;render();}
+
+// FX
+function openFx(idx){editIdx=idx;const fx=idx>=0?C.fx[idx]:null;$('#fxT').textContent=fx?'Éditer FX':'Ajouter FX';
+  $('#eLabel').value=fx?.label||'';$('#eType').value=fx?.type||'toggle';setSw('#eSmooth',fx?.smooth);$('#eSmDur').value=fx?.smoothDuration||500;
+  $('#eSmDW').style.display=fx?.smooth?'':'none';$('#eDel').style.display=idx>=0?'':'none';
+  editFxRoutes=fx?JSON.parse(JSON.stringify(fx.routes)):[];rFxRoutes();showMod('fx');}
+function closeFx(){hideMod('fx');}
+function rFxRoutes(){$('#eRoutes').innerHTML=editFxRoutes.map((r,i)=>{const g=C.groups.find(x=>x.id===r.gid);
+  return`<div class="route-row"><div class="route-tag" style="background:${g?.color||'var(--dim)'}">${g?.name||'G?'}</div>
+    <input class="route-input" value="${esc(r.addr)}" placeholder="Adresse OSC" oninput="editFxRoutes[${i}].addr=this.value">
+    <button class="route-del" onclick="editFxRoutes.splice(${i},1);rFxRoutes()">×</button></div>`;}).join('');}
+function addFxRoute(){const used=editFxRoutes.map(r=>r.gid);const next=C.groups.find(g=>!used.includes(g.id));
+  if(!next){toast('Tous les groupes ajoutés');return;}editFxRoutes.push({gid:next.id,addr:''});rFxRoutes();}
+function saveFx(){const label=$('#eLabel').value||'FX';const type=$('#eType').value;const sm=$('#eSmooth').classList.contains('on');const sd=parseInt($('#eSmDur').value)||500;
+  const routes=editFxRoutes.filter(r=>r.addr.trim());if(!routes.length){toast('Au moins une adresse');return;}
+  if(editIdx>=0)Object.assign(C.fx[editIdx],{label,type,smooth:sm,smoothDuration:sd,routes});
+  else{const id='fx'+Date.now();C.fx.push({id,label,type,smooth:sm,smoothDuration:sd,routes});fxVals[id]=0;routes.forEach(r=>togSt[id+'-'+r.gid]=false);}
+  closeFx();render();persist();}
+function delFx(){if(editIdx<0)return;C.fx.splice(editIdx,1);closeFx();render();persist();}
+
+// Layers
+function openLy(){editLayers=JSON.parse(JSON.stringify(C.layers));rLyR();showMod('ly');}
+function closeLy(){hideMod('ly');}
+function rLyR(){$('#lyRows').innerHTML=editLayers.map((ly,i)=>`<div style="margin-bottom:8px;padding:8px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--brd)">
+  <div class="fld-row" style="margin-bottom:4px"><div class="fld" style="flex:1"><div class="fld-l">Label</div><input value="${esc(ly.label)}" oninput="editLayers[${i}].label=this.value"></div>
+    <button class="ebtn" onclick="editLayers.splice(${i},1);rLyR()" style="color:var(--red);align-self:flex-end;margin-bottom:4px">×</button></div>
+  <div class="fld" style="margin-bottom:4px"><div class="fld-l">Opacity OSC</div><input value="${esc(ly.addr)}" oninput="editLayers[${i}].addr=this.value" style="font-size:11px;font-family:monospace"></div>
+  <div class="fld" style="margin-bottom:0"><div class="fld-l">Bypass OSC</div><input value="${esc(ly.byp)}" oninput="editLayers[${i}].byp=this.value" style="font-size:11px;font-family:monospace"></div>
+  </div>`).join('');}
+function addLy(){const n=editLayers.length+1;editLayers.push({label:'L'+n,addr:`/composition/layers/${n}/video/opacity`,byp:`/composition/layers/${n}/bypassed`});rLyR();}
+function saveLy(){C.layers=editLayers;layerByp={};layerVal={};C.layers.forEach((_,i)=>{layerByp[i]=false;layerVal[i]=1;});closeLy();render();persist();}
+
+// Settings + Presets
+function openSet(){$('#sH').value=C.osc.host;$('#sS').value=C.osc.sendPort;$('#sR').value=C.osc.receivePort;$('#sSm').value=C.smooth?.defaultDuration||500;loadPr();showMod('set');}
+function closeSet(){hideMod('set');}
+function selMidi(n){if(ws?.readyState===1)ws.send(JSON.stringify({type:'midi_select',port:n}));if(!C.midi)C.midi={};C.midi.outputPort=n;persist();}
+async function loadPr(){try{const l=await(await fetch('/api/presets')).json();$('#prList').innerHTML=l.map(n=>`<div class="preset-item"><div class="lbl-m" onclick="loadPr('${n}')">${n}</div><button class="ebtn" onclick="delPr('${n}')" style="color:var(--red)">×</button></div>`).join('')||'<p style="font-size:10px;color:var(--dim)">Aucun</p>';}catch{}}
+async function savePr(){const n=$('#prName').value.trim();if(!n){toast('Nom requis');return;}try{await fetch(`/api/presets/${n}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(C)});toast('✓');$('#prName').value='';loadPr();}catch{toast('Erreur');}}
+async function loadPr(n){if(typeof n==='object')return;try{const d=await(await fetch(`/api/presets/${n}`)).json();await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});location.reload();}catch{toast('Erreur');}}
+async function delPr(n){try{await fetch(`/api/presets/${n}`,{method:'DELETE'});loadPr();}catch{}}
+
+// Flow
+function openFl(i){editFlIdx=i;const fl=i>=0?C.flows[i]:null;$('#flT').textContent=fl?'Éditer Flow':'Nouveau Flow';$('#flN').value=fl?.name||'';$('#flDel').style.display=i>=0?'':'none';
+  const sel=fl?fl.controls:[];let ch='';
+  C.layers.forEach((_,i)=>{const cid='layer-'+i;ch+=`<div class="fl-chk${sel.includes(cid)?' on':''}" onclick="this.classList.toggle('on')" data-c="${cid}"><div class="fl-dot"></div><div class="fl-n">Layer ${C.layers[i].label}</div></div>`;});
+  C.fx.forEach(fx=>{const cid='fx-'+fx.id;ch+=`<div class="fl-chk${sel.includes(cid)?' on':''}" onclick="this.classList.toggle('on')" data-c="${cid}"><div class="fl-dot"></div><div class="fl-n">FX: ${fx.label}</div></div>`;});
+  (C.levels||[]).forEach((lv,li)=>{const cid='lev-'+li;ch+=`<div class="fl-chk${sel.includes(cid)?' on':''}" onclick="this.classList.toggle('on')" data-c="${cid}"><div class="fl-dot"></div><div class="fl-n">Levels: ${lv.label}</div></div>`;});
+  if(C.colorize?.routes?.length)ch+=`<div class="fl-chk${sel.includes('colorize')?' on':''}" onclick="this.classList.toggle('on')" data-c="colorize"><div class="fl-dot"></div><div class="fl-n">Colorize</div></div>`;
+  if(C.dreamyGlow?.routes?.length)ch+=`<div class="fl-chk${sel.includes('glow')?' on':''}" onclick="this.classList.toggle('on')" data-c="glow"><div class="fl-dot"></div><div class="fl-n">Dreamy Glow</div></div>`;
+  ch+=`<div class="fl-chk${sel.includes('master')?' on':''}" onclick="this.classList.toggle('on')" data-c="master"><div class="fl-dot"></div><div class="fl-n">Master</div></div>`;
+  $('#flChks').innerHTML=ch;showMod('fl');}
+function closeFl(){hideMod('fl');}
+function saveFl(){const n=$('#flN').value.trim()||'Flow';const ctrls=[...$$('#flChks .fl-chk.on')].map(el=>el.dataset.c);
+  if(!ctrls.length){toast('Sélectionne des contrôles');return;}
+  if(editFlIdx>=0&&editFlIdx<C.flows.length){C.flows[editFlIdx].name=n;C.flows[editFlIdx].controls=ctrls;}
+  else C.flows.push({id:'fl'+Date.now(),name:n,controls:ctrls});closeFl();render();persist();}
+function delFl(){if(editFlIdx<0)return;C.flows.splice(editFlIdx,1);closeFl();render();persist();}
+
+// Pads
+function openPad(i){editPdIdx=i;const pg=i>=0?C.pads[i]:null;$('#padN').value=pg?.name||'';editPadItems=pg?JSON.parse(JSON.stringify(pg.items||[])):[];rPadR();showMod('pad');}
+function closePad(){hideMod('pad');}
+function rPadR(){$('#padRows').innerHTML=editPadItems.map((p,i)=>`<div style="margin-bottom:6px;padding:6px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--brd)">
+  <div class="fld-row" style="margin-bottom:4px"><div class="fld" style="flex:1"><input value="${esc(p.label)}" placeholder="Nom" oninput="editPadItems[${i}].label=this.value"></div>
+    <button class="route-del" onclick="editPadItems.splice(${i},1);rPadR()">×</button></div>
+  <div class="fld" style="margin-bottom:0"><div class="fld-l">Adresse OSC</div><input value="${esc(p.addr)}" placeholder="/composition/layers/5/clips/1/connect" oninput="editPadItems[${i}].addr=this.value" style="font-size:11px;font-family:monospace"></div>
+  </div>`).join('');}
+function addPadI(){if(editPadItems.length>=8){toast('8 max');return;}editPadItems.push({label:'Pad '+(editPadItems.length+1),addr:'/composition/layers/1/clips/1/connect',color:'cyan'});rPadR();}
+function savePadPg(){const n=$('#padN').value.trim()||'Page';
+  if(editPdIdx>=0&&editPdIdx<C.pads.length){C.pads[editPdIdx].name=n;C.pads[editPdIdx].items=editPadItems;}
+  else C.pads.push({id:'pad'+Date.now(),name:n,items:editPadItems});closePad();render();persist();}
+function delPadPg(){if(editPdIdx<0)return;C.pads.splice(editPdIdx,1);activePad=Math.min(activePad,Math.max(0,C.pads.length-1));closePad();render();persist();}
+
+/* ═══ HELPERS ═══ */
+function togSw(el){el.classList.toggle('on');const sm=el.classList.contains('on');$('#eSmDW').style.display=sm?'':'none';}
+function setSw(s,v){$(s).classList.toggle('on',!!v);}
+function showMod(id){$(`#${id}Ov`).classList.add('show');setTimeout(()=>$(`#${id}Mod`).classList.add('show'),10);}
+function hideMod(id){$(`#${id}Mod`).classList.remove('show');setTimeout(()=>$(`#${id}Ov`).classList.remove('show'),250);}
+let sT;function persist(){clearTimeout(sT);sT=setTimeout(async()=>{try{await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(C)});toast('✓');}catch{toast('Erreur');}},300);}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1200);}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+document.addEventListener('touchmove',e=>{if(e.target.closest('.ct,.mod'))return;e.preventDefault();},{passive:false});
+init();
+</script>
+</body>
+</html>
